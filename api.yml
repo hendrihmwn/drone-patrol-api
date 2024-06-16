@@ -1,0 +1,253 @@
+# This is the OpenAPI specification for your service. It is used to generate the client code.
+# To generate the server code, use the Gradle task `openApiGenerate`. The 
+# generated code will be placed in `build/generate-resources/main`.
+#
+# We will evaluate you based on how well you design your API.
+# 1. How well it follows REST principles.
+# 2. How easy it is to understand and use.
+#
+# References
+# 1. https://swagger.io/specification/
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: User Service
+  license:
+    name: MIT
+servers:
+  - url: http://localhost
+paths:
+  /estate:
+    post:
+      summary: This endpoint is to create a new estate.
+      requestBody:
+        description: Parameter for creating estate
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEstateRequest'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/CreateEstateResponse"
+        '400':
+          description: Invalid value or format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /estate/{id}/tree:
+    post:
+      summary: This endpoint is to create tree object inside estate.
+      requestBody:
+        description: Parameter for creating tree
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTreeRequest'
+      parameters:
+        - name: id
+          description: Estate ID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/CreateTreeResponse"
+        '404':
+          description: Estate is not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '400':
+          description: Invalid value or format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /estate/{id}/stats:
+    get:
+      summary: This endpoint is to get stats of the tree in the estate.
+      parameters:
+        - name: id
+          description: Estate ID
+          in: path
+          required: true
+          schema:
+            type: string
+          x-oapi-codegen-extra-tags:
+            validate: "required"
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/GetEstateStatsResponse"
+        '404':
+          description: Estate is not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /estate/{id}/drone-plan:
+    get:
+      summary: This endpoint is to get sum distance of the drone monitoring travel in the estate.
+      parameters:
+        - name: id
+          description: Estate ID
+          in: path
+          required: true
+          schema:
+            type: string
+          x-oapi-codegen-extra-tags:
+            validate: "required"
+        - name: max-distance
+          description: Max distance of drone
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/GetEstateDronePlanResponse"
+        '404':
+          description: Estate is not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    CreateEstateRequest:
+      type: object
+      description: Parameter for creating estate
+      example:
+        width: 5
+        length: 5
+      properties:
+        width:
+          type: integer
+          description: The distance (10 m scale) from center to north
+          minimum: 1
+          maximum: 50000
+          x-oapi-codegen-extra-tags:
+            validate: "required,gte=1,lte=50000"
+        length:
+          type: integer
+          description: The distance (10 m scale) from center to east
+          minimum: 1
+          maximum: 50000
+          x-oapi-codegen-extra-tags:
+            validate: "required,gte=1,lte=50000"
+      required:
+        - width
+        - length
+    CreateEstateResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: "343d61a2-19ff-402b-ba3b-c474a6c3968c"
+    CreateTreeRequest:
+      type: object
+      description: Parameter for creating tree
+      example:
+        x: 3
+        y: 2
+        height: 10
+      properties:
+        x:
+          type: integer
+          description: location in x plot
+          minimum: 1
+          maximum: 50000
+          x-oapi-codegen-extra-tags:
+            validate: "required,gte=1,lte=50000"
+        y:
+          type: integer
+          description: location in y plot
+          minimum: 1
+          maximum: 50000
+          x-oapi-codegen-extra-tags:
+            validate: "required,gte=1,lte=50000"
+        height:
+          type: integer
+          description: height of tree
+          minimum: 1
+          maximum: 30
+          x-oapi-codegen-extra-tags:
+            validate: "required,gte=1,lte=30"
+      required:
+        - x
+        - y
+        - height
+    CreateTreeResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: "343d61a2-19ff-402b-ba3b-c474a6c3968c"
+    GetEstateStatsResponse:
+      type: object
+      required:
+        - count
+        - max
+        - min
+        - median
+      properties:
+        count:
+          type: integer
+          example: 0
+        max:
+          type: integer
+          example: 0
+        min:
+          type: integer
+          example: 0
+        median:
+          type: integer
+          example: 0
+    GetEstateDronePlanResponse:
+      type: object
+      required:
+        - distance
+      properties:
+        distance:
+          type: integer
+          example: 200
+        rest:
+          type: object
+          example: {x: 1, y: 1}
